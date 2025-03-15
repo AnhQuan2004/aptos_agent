@@ -8,15 +8,16 @@
   "dependencies": {
     "@aptos-labs/ts-sdk": "^1.26.0",
     "@elizaos/core": "workspace:^",
+    "@pinata/sdk": "^1.0.1",
+    "agent-twitter-client": "^0.0.18",
+    "axios": "^1.7.9",
     "bignumber.js": "9.1.2",
-    "node-cache": "5.1.2",
-    "tsup": "8.3.5",
-    "vitest": "2.1.9",
     "ethers": "^6.11.1",
-		"axios": "^1.7.9",
-		"langchain": "^0.1.9",
-		"pinata-web3": "^0.5.4",
-		"@pinata/sdk": "^1.0.1"
+    "langchain": "^0.1.9",
+    "node-cache": "5.1.2",
+    "pinata-web3": "^0.5.4",
+    "tsup": "8.3.5",
+    "vitest": "2.1.9"
   },
   "scripts": {
     "build": "tsup --format esm --dts",
@@ -29,6 +30,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "ts-node": "^10.9.2",
+    "ts-node-esm": "^0.0.6",
     "typescript": "^5.7.3"
   },
   "peerDependencies": {
