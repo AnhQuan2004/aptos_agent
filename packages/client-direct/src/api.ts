@@ -100,6 +100,136 @@ export function createApiRouter(
         res.json({ message: "Hello World!" });
     });
 
+    // Add sentiment analysis route using Gemini
+    router.post("/sentiment", async (req, res) => {
+        try {
+            const { text } = req.body;
+
+            if (!text || typeof text !== 'string') {
+                return res.status(400).json({ 
+                    error: "Missing or invalid 'text' parameter. Please provide text to analyze." 
+                });
+            }
+
+            const prompt = `
+            Analyze the sentiment of this text and classify it as exactly one of these: "positive", "negative", or "neutral".
+            
+            Text: "${text}"
+            
+            Only respond with one word: either "positive", "negative", or "neutral".
+            `;
+
+            try {
+                const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY || '');
+                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                let sentiment = response.text().trim().toLowerCase();
+                
+                // Ensure we only return one of the three valid responses
+                if (!['positive', 'negative', 'neutral'].includes(sentiment)) {
+                    // Extract just the sentiment word if it's embedded in a sentence
+                    if (sentiment.includes('positive')) sentiment = 'positive';
+                    else if (sentiment.includes('negative')) sentiment = 'negative';
+                    else sentiment = 'neutral';
+                }
+                
+                // For simple mode (only returning sentiment string)
+                if (req.query.simple === 'true') {
+                    return res.json(sentiment);
+                }
+                
+                // Return complete result
+                res.json({
+                    text,
+                    sentiment,
+                    timestamp: new Date().toISOString()
+                });
+                
+            } catch (error) {
+                console.error('Gemini API error:', error);
+                res.status(500).json({ 
+                    error: "Failed to analyze sentiment with Gemini", 
+                    details: error.message,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        } catch (error) {
+            console.error("Error in sentiment analysis API:", error);
+            res.status(500).json({ 
+                error: "Failed to analyze sentiment", 
+                details: error.message,
+                timestamp: new Date().toISOString()
+            });
+        }
+    });
+
+    // Add GET method for sentiment analysis
+    router.get("/sentiment", async (req, res) => {
+        try {
+            const text = req.query.text as string;
+
+            if (!text || typeof text !== 'string') {
+                return res.status(400).json({ 
+                    error: "Missing or invalid 'text' query parameter. Please provide text to analyze using ?text=your+text+here" 
+                });
+            }
+
+            const prompt = `
+            Analyze the sentiment of this text and classify it as exactly one of these: "positive", "negative", or "neutral".
+            
+            Text: "${text}"
+            
+            Only respond with one word: either "positive", "negative", or "neutral".
+            `;
+
+            try {
+                const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY || '');
+                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                let sentiment = response.text().trim().toLowerCase();
+                
+                // Ensure we only return one of the three valid responses
+                if (!['positive', 'negative', 'neutral'].includes(sentiment)) {
+                    // Extract just the sentiment word if it's embedded in a sentence
+                    if (sentiment.includes('positive')) sentiment = 'positive';
+                    else if (sentiment.includes('negative')) sentiment = 'negative';
+                    else sentiment = 'neutral';
+                }
+                
+                // For simple mode (only returning sentiment string)
+                if (req.query.simple === 'true') {
+                    return res.json(sentiment);
+                }
+                
+                // Return complete result
+                res.json({
+                    text,
+                    sentiment,
+                    timestamp: new Date().toISOString()
+                });
+                
+            } catch (error) {
+                console.error('Gemini API error:', error);
+                res.status(500).json({ 
+                    error: "Failed to analyze sentiment with Gemini", 
+                    details: error.message,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        } catch (error) {
+            console.error("Error in sentiment analysis API:", error);
+            res.status(500).json({ 
+                error: "Failed to analyze sentiment", 
+                details: error.message,
+                timestamp: new Date().toISOString()
+            });
+        }
+    });
+
     // Route to process and distribute rewards for expired bounties
     router.get("/reward", async (req, res) => {
         try {
